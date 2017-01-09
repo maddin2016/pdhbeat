@@ -16,6 +16,9 @@ pdhbeat.modules:
   enabled: true
   period: 1s
   hosts: ["localhost"]
+  counters:  
+    - alias: "Prozessorzeit"
+      query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"
 
 
 
@@ -41,10 +44,10 @@ pdhbeat.modules:
 # Multiple outputs may be used.
 
 #-------------------------- Elasticsearch output ------------------------------
-output.elasticsearch:
+output.console:
   # Array of hosts to connect to.
-  hosts: ["localhost:9200"]
-
+  #hosts: ["localhost:9200"]
+  pretty: true
   # Optional protocol and basic auth credentials.
   #protocol: "https"
   #username: "elastic"

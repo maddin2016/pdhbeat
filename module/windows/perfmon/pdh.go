@@ -1,4 +1,4 @@
-package beater
+package perfmon
 
 /*
 #include <windows.h>
@@ -17,7 +17,6 @@ import (
 	"strconv"
 
 	"github.com/elastic/beats/libbeat/common"
-	"github.com/maddin2016/perfmonbeat/config"
 )
 
 type Handle struct {
@@ -34,7 +33,7 @@ type Counter struct {
 	displayValue C.struct__PDH_FMT_COUNTERVALUE
 }
 
-func GetHandle(config []config.CounterConfig) (handle *Handle, err error) {
+func GetHandle(config []CounterConfig) (handle *Handle, err error) {
 	q := &Handle{query: nil}
 	q.status = C.PdhOpenQuery(nil, 1, &q.query)
 	counters := make([]Counter, len(config))
@@ -45,7 +44,7 @@ func GetHandle(config []config.CounterConfig) (handle *Handle, err error) {
 		q.status = C.PdhAddCounter(q.query, (*C.CHAR)(counters[i].counterPath), 0, &counters[i].counter)
 		if q.status != C.ERROR_SUCCESS {
 			err := errors.New("PdhAddCounter is failed for " + v.Alias)
-			return nil, err
+			return q, err
 		}
 	}
 

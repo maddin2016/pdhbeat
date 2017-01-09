@@ -24,6 +24,8 @@ func init() {
 // multiple fetch calls.
 type MetricSet struct {
 	mb.BaseMetricSet
+	counters []CounterConfig
+	handle   *Handle
 }
 
 // New create a new instance of the MetricSet
@@ -31,17 +33,24 @@ type MetricSet struct {
 // configuration entries if needed.
 func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 
-	config := struct{
-		Counters []CounterConfig `config:"counters"`
+	config := struct {
+		CounterConfig []CounterConfig `config:"counters"`
 	}{}
 
 	if err := base.Module().UnpackConfig(&config); err != nil {
 		return nil, err
 	}
 
+	query, err := GetHandle(config.CounterConfig)
+
+	if err != nil {
+		//logp.Err("%v", err)
+	}
+
 	return &MetricSet{
 		BaseMetricSet: base,
-		counter:       1,
+		counters:      config.CounterConfig,
+		handle:        query,
 	}, nil
 }
 
@@ -50,8 +59,13 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 // descriptive error must be returned.
 func (m *MetricSet) Fetch() (common.MapStr, error) {
 
+	data, err := m.handle.ReadData()
+	if err != nil {
+		//logp.Err("%v", err)
+	}
+
 	event := common.MapStr{
-		"counter": m.counter,
+		"data": data,
 	}
 
 	return event, nil
