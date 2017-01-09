@@ -3,4 +3,6 @@
   enabled: true
   period: 1s
   hosts: ["localhost"]
-
+  perfmon.counters:  
+    - alias: "Prozessorzeit"
+      query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"

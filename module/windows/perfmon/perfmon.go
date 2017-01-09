@@ -5,6 +5,11 @@ import (
 	"github.com/elastic/beats/metricbeat/mb"
 )
 
+type CounterConfig struct {
+	Alias string `config:"alias"`
+	Query string `config:"query"`
+}
+
 // init registers the MetricSet with the central registry.
 // The New method will be called after the setup of the module and before starting to fetch data
 func init() {
@@ -19,7 +24,6 @@ func init() {
 // multiple fetch calls.
 type MetricSet struct {
 	mb.BaseMetricSet
-	counter int
 }
 
 // New create a new instance of the MetricSet
@@ -27,7 +31,9 @@ type MetricSet struct {
 // configuration entries if needed.
 func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 
-	config := struct{}{}
+	config := struct{
+		Counters []CounterConfig `config:"counters"`
+	}{}
 
 	if err := base.Module().UnpackConfig(&config); err != nil {
 		return nil, err
@@ -47,7 +53,6 @@ func (m *MetricSet) Fetch() (common.MapStr, error) {
 	event := common.MapStr{
 		"counter": m.counter,
 	}
-	m.counter++
 
 	return event, nil
 }
