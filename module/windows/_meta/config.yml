@@ -2,7 +2,6 @@
   metricsets: ["perfmon"]
   enabled: true
   period: 1s
-  hosts: ["localhost"]
-  perfmon.counters:  
-    - alias: "Prozessorzeit"
-      query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"
+  #counters:  
+    #- alias: "Prozessorzeit"
+      #query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"

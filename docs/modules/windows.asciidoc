@@ -22,9 +22,9 @@ pdhbeat.modules:
   metricsets: ["perfmon"]
   enabled: true
   period: 1s
-  hosts: ["localhost"]
-
-----
+  #counters:  
+    #- alias: "Prozessorzeit"
+      #query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"----
 
 [float]
 === Metricsets
