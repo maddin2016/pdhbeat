@@ -1,0 +1,10 @@
+////
+This file is generated! See scripts/docs_collector.py
+////
+
+  * <<metricbeat-module-windows,windows>>
+
+
+--
+
+include::modules/windows.asciidoc[]

@@ -1,0 +1,9 @@
+- name: perfmon
+  type: group
+  description: >
+    perfmon
+  fields:
+    - name: example
+      type: keyword
+      description: >
+        Example field
