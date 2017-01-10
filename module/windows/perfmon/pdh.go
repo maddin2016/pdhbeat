@@ -1,14 +1,5 @@
 package perfmon
 
-/*
-#include <windows.h>
-#include <stdio.h>
-#include <conio.h>
-#include <pdh.h>
-#include <pdhmsg.h>
-#cgo LDFLAGS: -lpdh
-*/
-import "C"
 import (
 	"unsafe"
 
@@ -16,33 +7,34 @@ import (
 
 	"strconv"
 
+	"syscall"
+
 	"github.com/elastic/beats/libbeat/common"
 )
 
 type Handle struct {
-	status      C.PDH_STATUS
-	query       C.HQUERY
-	counterType C.DWORD
+	status      int
+	query       *syscall.Handle
+	counterType int
 	counters    []Counter
 }
 
 type Counter struct {
 	counterName  string
-	counter      C.HCOUNTER
-	counterPath  *C.CHAR
-	displayValue C.struct__PDH_FMT_COUNTERVALUE
+	counter      syscall.Handle
+	counterPath  string
+	displayValue PdhCounterValue
 }
 
 func GetHandle(config []CounterConfig) (handle *Handle, err error) {
 	q := &Handle{query: nil}
-	q.status = C.PdhOpenQuery(nil, 1, &q.query)
+	q.status = _PdhOpenQuery(nil, 0, q.query)
 	counters := make([]Counter, len(config))
 	q.counters = counters
 	for i, v := range config {
-		counters[i] = Counter{counterPath: (*C.CHAR)(C.CString(v.Query)), counterName: v.Alias}
-		defer C.free(unsafe.Pointer(counters[i].counterPath))
-		q.status = C.PdhAddCounter(q.query, (*C.CHAR)(counters[i].counterPath), 0, &counters[i].counter)
-		if q.status != C.ERROR_SUCCESS {
+		counters[i] = Counter{counterPath: v.Query, counterName: v.Alias}
+		q.status = _PdhAddCounter(*q.query, counters[i].counterPath, 0, &counters[i].counter)
+		if q.status != ERROR_SUCCESS {
 			err := errors.New("PdhAddCounter is failed for " + v.Alias)
 			return q, err
 		}
@@ -53,9 +45,9 @@ func GetHandle(config []CounterConfig) (handle *Handle, err error) {
 
 func (q *Handle) ReadData() (data []common.MapStr, err error) {
 	result := make([]common.MapStr, len(q.counters))
-	q.status = C.PdhCollectQueryData(q.query)
+	q.status = _PdhCollectQueryData(*q.query)
 
-	if q.status != C.ERROR_SUCCESS {
+	if q.status != ERROR_SUCCESS {
 		sP := (*int)(unsafe.Pointer(&q.status))
 		s := strconv.Itoa(*sP)
 		err := errors.New("PdhCollectQueryData failed with status " + s)
@@ -63,15 +55,15 @@ func (q *Handle) ReadData() (data []common.MapStr, err error) {
 	}
 
 	for i, v := range q.counters {
-		q.status = C.PdhGetFormattedCounterValue(v.counter, C.PDH_FMT_DOUBLE, &q.counterType, &v.displayValue)
-		if q.status != C.ERROR_SUCCESS {
+		q.status = _PdhGetFormattedCounterValue(*v.counter, PdhFmtDouble, q.counterType, v.displayValue)
+		if q.status != ERROR_SUCCESS {
 			sP := (*int)(unsafe.Pointer(&q.status))
 			s := strconv.Itoa(*sP)
 			err := errors.New("PdhGetFormattedCounterValue failed with status " + s)
 			return nil, err
 		}
 
-		doubleValue := (*float64)(unsafe.Pointer(&v.displayValue.anon0))
+		doubleValue := (*float64)(unsafe.Pointer(&v.displayValue))
 
 		val := common.MapStr{
 			"name":  v.counterName,
@@ -81,3 +73,10 @@ func (q *Handle) ReadData() (data []common.MapStr, err error) {
 	}
 	return result, nil
 }
+
+//go:generate go run $GOROOT/src/syscall/mksyscall_windows.go -output pdh_windows.go pdh.go
+// Windows API calls
+//sys   _PdhOpenQuery(dataSource *string, userData int, query *syscall.Handle) (err int) = pdh.PdhOpenQuery
+//sys   _PdhAddCounter(query syscall.Handle, counterPath string, userData int, counter *syscall.Handle) (err int) = pdh.PdhAddCounter
+//sys   _PdhCollectQueryData(query syscall.Handle) (err int) = pdh.PdhCollectQueryData
+//sys   _PdhGetFormattedCounterValue(counter syscall.Handle, format int, counterType int, value PdhCounterValue) (err int) = pdh.GetFormattedCounterValue
