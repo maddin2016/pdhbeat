@@ -47,19 +47,15 @@ func (q *Handle) ReadData() (data []common.MapStr, err error) {
 	result := make([]common.MapStr, len(q.counters))
 	q.status = _PdhCollectQueryData(*q.query)
 
-	if q.status != ERROR_SUCCESS {
-		sP := (*int)(unsafe.Pointer(&q.status))
-		s := strconv.Itoa(*sP)
-		err := errors.New("PdhCollectQueryData failed with status " + s)
+	if q.status != ERROR_SUCCESS {		
+		err := errors.New("PdhCollectQueryData failed with status " + q.status)
 		return nil, err
 	}
 
 	for i, v := range q.counters {
 		q.status = _PdhGetFormattedCounterValue(*v.counter, PdhFmtDouble, q.counterType, v.displayValue)
-		if q.status != ERROR_SUCCESS {
-			sP := (*int)(unsafe.Pointer(&q.status))
-			s := strconv.Itoa(*sP)
-			err := errors.New("PdhGetFormattedCounterValue failed with status " + s)
+		if q.status != ERROR_SUCCESS {			
+			err := errors.New("PdhGetFormattedCounterValue failed with status " + q.status)
 			return nil, err
 		}
 
