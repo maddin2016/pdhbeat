@@ -2,6 +2,7 @@ package perfmon
 
 import (
 	"github.com/elastic/beats/libbeat/common"
+	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/metricbeat/mb"
 )
 
@@ -44,7 +45,7 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 	query, err := GetHandle(config.CounterConfig)
 
 	if err != nil {
-		//logp.Err("%v", err)
+		logp.Err("%v", err)
 	}
 
 	return &MetricSet{
@@ -61,7 +62,7 @@ func (m *MetricSet) Fetch() (common.MapStr, error) {
 
 	data, err := m.handle.ReadData()
 	if err != nil {
-		//logp.Err("%v", err)
+		logp.Err("%v", err)
 	}
 
 	event := common.MapStr{
