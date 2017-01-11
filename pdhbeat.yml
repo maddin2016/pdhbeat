@@ -19,6 +19,8 @@ pdhbeat.modules:
   counters:  
     - alias: "Prozessorzeit"
       query: "\\Prozessorinformationen(*)\\Prozessorzeit (%)"
+    - alias: "Prozessorzeit2"
+      query: "\\Prozessorinformationen(*)\\% der maximalen Frequenz"
 
 
 

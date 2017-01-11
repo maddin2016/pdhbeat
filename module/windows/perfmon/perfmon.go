@@ -44,7 +44,7 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 
 	query, err := GetHandle(config.CounterConfig)
 
-	if err != nil {
+	if err != 0 {
 		logp.Err("%v", err)
 	}
 
@@ -61,7 +61,7 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 func (m *MetricSet) Fetch() (common.MapStr, error) {
 
 	data, err := m.handle.ReadData()
-	if err != nil {
+	if err != 0 {
 		logp.Err("%v", err)
 	}
 

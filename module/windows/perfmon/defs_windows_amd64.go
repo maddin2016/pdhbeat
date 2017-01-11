@@ -11,9 +11,9 @@ const (
 	PDH_INVALID_HANDLE      = 0xc0000bbc
 	PDH_INVALID_DATA        = 0xc0000bc6
 	PDH_NO_MORE_DATA        = 0xc0000bcc
-	PdhFmtDouble            = 0x200
-	PdhFmtLarge             = 0x400
-	PdhFmtLong              = 0x100
+	PdhFmtDouble            = 0x00000200
+	PdhFmtLarge             = 0x00000400
+	PdhFmtLong              = 0x00000100
 )
 
 type PdhCounterValue struct {
