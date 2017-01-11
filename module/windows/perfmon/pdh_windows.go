@@ -13,7 +13,7 @@ var (
 	modpdh = syscall.NewLazyDLL("pdh.dll")
 
 	procPdhOpenQuery                = modpdh.NewProc("PdhOpenQuery")
-	procPdhAddCounterW              = modpdh.NewProc("PdhAddCounterW")
+	procPdhAddEnglishCounterW       = modpdh.NewProc("PdhAddEnglishCounterW")
 	procPdhCollectQueryData         = modpdh.NewProc("PdhCollectQueryData")
 	procPdhGetFormattedCounterValue = modpdh.NewProc("PdhGetFormattedCounterValue")
 )
@@ -34,7 +34,7 @@ func _PdhAddCounter(query uintptr, counterPath string, userData uintptr, counter
 }
 
 func __PdhAddCounter(query uintptr, counterPath *uint16, userData uintptr, counter *uintptr) (err int) {
-	r0, _, _ := syscall.Syscall6(procPdhAddCounterW.Addr(), 4, uintptr(query), uintptr(unsafe.Pointer(counterPath)), uintptr(userData), uintptr(unsafe.Pointer(counter)), 0, 0)
+	r0, _, _ := syscall.Syscall6(procPdhAddEnglishCounterW.Addr(), 4, uintptr(query), uintptr(unsafe.Pointer(counterPath)), uintptr(userData), uintptr(unsafe.Pointer(counter)), 0, 0)
 	err = int(r0)
 	return
 }

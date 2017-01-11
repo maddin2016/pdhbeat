@@ -67,6 +67,6 @@ func (q *Handle) ReadData() ([]common.MapStr, int) {
 //go:generate go run $GOROOT/src/syscall/mksyscall_windows.go -output pdh_windows.go pdh.go
 // Windows API calls
 //sys   _PdhOpenQuery(dataSource uintptr, userData uintptr, query *uintptr) (err int) = pdh.PdhOpenQuery
-//sys   _PdhAddCounter(query uintptr, counterPath string, userData uintptr, counter *uintptr) (err int) = pdh.PdhAddCounterW
+//sys   _PdhAddCounter(query uintptr, counterPath string, userData uintptr, counter *uintptr) (err int) = pdh.PdhAddEnglishCounterW
 //sys   _PdhCollectQueryData(query uintptr) (err int) = pdh.PdhCollectQueryData
 //sys   _PdhGetFormattedCounterValue(counter uintptr, format uint32, counterType int, value *PdhCounterValue) (err int) = pdh.PdhGetFormattedCounterValue
