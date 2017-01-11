@@ -1,6 +1,9 @@
 package perfmon
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/metricbeat/mb"
@@ -42,10 +45,19 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 		return nil, err
 	}
 
+	for _, v := range config.CounterConfig {
+		if len(v.Alias) <= 0 {
+			err := errors.New("Alias for counter cannot be empty")
+			logp.Err("%v", err)
+			return nil, err
+		}
+	}
+
 	query, err := GetHandle(config.CounterConfig)
 
 	if err != 0 {
 		logp.Err("%v", err)
+		return nil, errors.New("Initialization fails with error: " + strconv.Itoa(err))
 	}
 
 	return &MetricSet{
@@ -63,6 +75,7 @@ func (m *MetricSet) Fetch() (common.MapStr, error) {
 	data, err := m.handle.ReadData()
 	if err != 0 {
 		logp.Err("%v", err)
+		return nil, errors.New("Fetching fails wir error: " + strconv.Itoa(err))
 	}
 
 	event := common.MapStr{
