@@ -1,19 +1,4 @@
 - name: perfmon
   type: group
   description: >
-    perfmon
-  fields:
-    - name: data
-      type: group
-      description: >
-        Example field
-      fields:
-        - name: name
-          type: string
-          description: >
-            Name of the Counter
-        
-        - name: value
-          type: long
-          description: >
-            Value
+    perfmon  

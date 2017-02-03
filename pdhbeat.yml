@@ -16,9 +16,17 @@ pdhbeat.modules:
   enabled: true
   period: 1s
   hosts: ["localhost"]
-  counters:  
-    - alias: "Prozessorzeit"
-      query: "\\Processor Information(_Total)\\% Processor Time"
+  counters:
+    - group: "Processor"  
+      collectors:  
+        - alias: "Prozessorzeit"
+          query: "\\Processor Information(_Total)\\% Performance Limit"
+        - alias: "ProzessorPerfomance"
+          query: "\\Processor Information(_Total)\\% Processor Performance"
+    - group: "Disk"
+      collectors:
+        - alias: "Bytes_geschrieben"
+          query: "\\FileSystem Disk Activity(_Total)\\FileSystem Bytes Written"
 
 
 #================================ General =====================================

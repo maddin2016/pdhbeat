@@ -10,6 +10,11 @@ import (
 )
 
 type CounterConfig struct {
+	Name  string               `config:"group"`
+	Group []CounterConfigGroup `config:"collectors"`
+}
+
+type CounterConfigGroup struct {
 	Alias string `config:"alias"`
 	Query string `config:"query"`
 }
@@ -46,10 +51,12 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 	}
 
 	for _, v := range config.CounterConfig {
-		if len(v.Alias) <= 0 {
-			err := errors.New("Alias for counter cannot be empty")
-			logp.Err("%v", err)
-			return nil, err
+		for _, v1 := range v.Group {
+			if len(v1.Alias) <= 0 {
+				err := errors.New("Alias for counter cannot be empty")
+				logp.Err("%v", err)
+				return nil, err
+			}
 		}
 	}
 
@@ -78,9 +85,5 @@ func (m *MetricSet) Fetch() (common.MapStr, error) {
 		return nil, errors.New("Fetching fails wir error: " + strconv.Itoa(err))
 	}
 
-	event := common.MapStr{
-		"data": data,
-	}
-
-	return event, nil
+	return data, nil
 }

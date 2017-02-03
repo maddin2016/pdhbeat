@@ -10,7 +10,12 @@ type Handle struct {
 	status      error
 	query       uintptr
 	counterType int
-	counters    []Counter
+	counters    []CounterGroup
+}
+
+type CounterGroup struct {
+	GroupName string
+	Counters  []Counter
 }
 
 type Counter struct {
@@ -26,40 +31,45 @@ func GetHandle(config []CounterConfig) (*Handle, int) {
 	if err != ERROR_SUCCESS {
 		return nil, err
 	}
-	counters := make([]Counter, len(config))
-	q.counters = counters
+	counterGroups := make([]CounterGroup, len(config))
+	q.counters = counterGroups
 	for i, v := range config {
-		counters[i] = Counter{counterPath: v.Query, counterName: v.Alias}
-		err := _PdhAddCounter(q.query, counters[i].counterPath, 0, &counters[i].counter)
-		if err != ERROR_SUCCESS {
-			return q, err
+		counterGroups[i] = CounterGroup{GroupName: v.Name, Counters: make([]Counter, len(v.Group))}
+		for j, v1 := range v.Group {
+			counterGroups[i].Counters[j] = Counter{counterName: v1.Alias, counterPath: v1.Query}
+			err := _PdhAddCounter(q.query, counterGroups[i].Counters[j].counterPath, 0, &counterGroups[i].Counters[j].counter)
+			if err != ERROR_SUCCESS {
+				return q, err
+			}
 		}
 	}
 
 	return q, 0
 }
 
-func (q *Handle) ReadData() ([]common.MapStr, int) {
-	result := make([]common.MapStr, len(q.counters))
+func (q *Handle) ReadData() (common.MapStr, int) {
+
 	err := _PdhCollectQueryData(q.query)
 
 	if err != ERROR_SUCCESS {
 		return nil, err
 	}
 
-	for i, v := range q.counters {
-		err := _PdhGetFormattedCounterValue(v.counter, PdhFmtDouble, q.counterType, &v.displayValue)
-		if err != ERROR_SUCCESS {
-			return nil, err
-		}
+	result := common.MapStr{}
 
-		doubleValue := (*float64)(unsafe.Pointer(&v.displayValue.LongValue))
+	for _, v := range q.counters {
 
-		val := common.MapStr{
-			"name":  v.counterName,
-			"value": *doubleValue,
+		groupVal := make(map[string]interface{})
+		for _, v1 := range v.Counters {
+			err := _PdhGetFormattedCounterValue(v1.counter, PdhFmtDouble, q.counterType, &v1.displayValue)
+			if err != ERROR_SUCCESS {
+				return nil, err
+			}
+			doubleValue := (*float64)(unsafe.Pointer(&v1.displayValue.LongValue))
+			groupVal[v1.counterName] = *doubleValue
+
 		}
-		result[i] = val
+		result[v.GroupName] = groupVal
 	}
 	return result, 0
 }
