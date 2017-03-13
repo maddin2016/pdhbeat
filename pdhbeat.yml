@@ -17,7 +17,7 @@ pdhbeat.modules:
   period: 1s
   hosts: ["localhost"]
   counters:
-    - group: "Processor"  
+    - group: "Processor"
       collectors:  
         - alias: "Prozessorzeit"
           query: "\\Processor Information(_Total)\\% Performance Limit"

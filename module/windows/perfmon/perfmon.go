@@ -51,6 +51,11 @@ func New(base mb.BaseMetricSet) (mb.MetricSet, error) {
 	}
 
 	for _, v := range config.CounterConfig {
+		if len(v.Name) <= 0 {
+			err := errors.New("Group cannot be empty")
+			logp.Err("%v", err)
+			return nil, err
+		}
 		for _, v1 := range v.Group {
 			if len(v1.Alias) <= 0 {
 				err := errors.New("Alias for counter cannot be empty")
