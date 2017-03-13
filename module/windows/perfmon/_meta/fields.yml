@@ -1,4 +1,26 @@
-- name: perfmon
-  type: group
+- key: windows
+  title: "Windows"
   description: >
-    perfmon  
+    Metrics collected from Windows
+fields:
+  - name: counters
+    type: group
+    description: >
+      Grouping of different counters
+    fields: 
+      - name: group
+        type: string
+        description: >
+          Name of the group. For example `Processor` or `Disk`
+      - name: collectors
+        type: group
+        fields:
+          - name: alias
+            type: string
+            description: >
+              Short form for the query
+          - name: query
+            type: string
+            description: >
+              The query. For example `\\Processor Information(_Total)\\% Processor Performance`. Backslashes have to be escaped.
+
